@@ -1,0 +1,1067 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-background: #0A0A0A;
+    --color-primary: #9C5FE9;      /* Softer purple */
+    --color-secondary: #3DEFE9;    /* Softer teal */
+    --color-accent: #7B4ED8;       /* Deeper purple */
+    --color-text: #FFFFFF;
+    --color-text-secondary: #A0A0A0;
+    --color-gradient-start: #7B4ED8;
+    --color-gradient-mid: #3DEFE9;
+    --color-gradient-end: #9C5FE9;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+    @apply transition-colors duration-300;
+  }
+
+  body {
+    @apply overflow-x-hidden bg-[#0A0A0A] transition-colors duration-300;
+  }
+
+  /* Optimize mobile text rendering */
+  @media (max-width: 768px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-rendering: optimizeLegibility;
+    }
+  }
+}
+
+.nav-link {
+  @apply relative text-gray-300 hover:text-[#3DEFE9] transition-all px-4 py-2 duration-300 font-medium;
+}
+
+.nav-link::after {
+  @apply content-[''] absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-[#7B4ED8] to-[#3DEFE9] transform scale-x-0 origin-left transition-transform duration-300;
+}
+
+.nav-link:hover::after {
+  @apply scale-x-100;
+}
+
+.nav-link.active {
+  @apply text-[#3DEFE9];
+}
+
+.nav-link.active::after {
+  @apply scale-x-100;
+}
+
+.section-title {
+  @apply text-3xl font-bold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-[#7B4ED8] via-[#3DEFE9] to-[#9C5FE9];
+}
+
+.card {
+  @apply bg-[#0A0A0A]/80 p-6 rounded-lg transition-all transform
+         hover:scale-105 hover:bg-[#0A0A0A]/90 duration-300
+         shadow-sm hover:shadow-[0_0_15px_rgba(123,78,216,0.3)] border border-[#7B4ED8]/20 hover:border-[#9C5FE9]/40;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.button-primary {
+  @apply relative overflow-hidden bg-gradient-to-r from-[#7B4ED8] to-[#9C5FE9] px-8 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all transform hover:translate-y-[-2px] hover:shadow-[0_5px_15px_rgba(123,78,216,0.4)] duration-300 text-white;
+}
+
+.button-primary::after {
+  @apply content-[''] absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full transition-transform duration-700 ease-in-out;
+}
+
+.button-primary:hover::after {
+  @apply translate-x-full;
+}
+
+.button-secondary {
+  @apply relative overflow-hidden bg-transparent border border-[#3DEFE9] hover:bg-[#3DEFE9]/10 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all transform hover:translate-y-[-2px] hover:shadow-[0_5px_15px_rgba(61,239,233,0.2)] duration-300 text-[#3DEFE9];
+}
+
+.button-secondary::after {
+  @apply content-[''] absolute inset-0 bg-gradient-to-r from-transparent via-[#3DEFE9]/10 to-transparent -translate-x-full transition-transform duration-700 ease-in-out;
+}
+
+.button-secondary:hover::after {
+  @apply translate-x-full;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+
+  /* Reduce animation complexity on mobile */
+  .card, .button-primary, .button-secondary {
+    @apply hover:transform-none hover:scale-100;
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Optimize touch interactions */
+  .nav-link, .button-primary, .button-secondary {
+    @apply cursor-pointer touch-manipulation;
+  }
+
+  /* Improve button sizing on mobile */
+  .button-primary, .button-secondary {
+    @apply px-4 py-3 text-sm w-full justify-center;
+  }
+
+  /* Improve text readability on mobile */
+  h1 {
+    @apply text-3xl leading-tight;
+  }
+
+  h2 {
+    @apply text-2xl leading-tight;
+  }
+
+  p {
+    @apply text-sm leading-relaxed;
+  }
+
+  /* Optimize spacing for mobile */
+  .py-20 {
+    @apply py-12;
+  }
+
+  .mb-12 {
+    @apply mb-8;
+  }
+
+  .gap-8 {
+    @apply gap-6;
+  }
+
+  /* Reduce blur effects on mobile for better performance */
+  [class*="blur-3xl"] {
+    @apply blur-2xl opacity-30;
+  }
+
+  /* Optimize card padding on mobile */
+  .p-8 {
+    @apply p-5;
+  }
+
+  .p-6 {
+    @apply p-4;
+  }
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-spin-once {
+  animation: spinOnce 0.3s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulseSoft {
+  0% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.03); }
+  100% { opacity: 0.8; transform: scale(1); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes spinOnce {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(180deg); }
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.5; transform: translateX(-100%); }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; transform: translateX(100%); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(123, 78, 216, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(123, 78, 216, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(123, 78, 216, 0.3); }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+/* Improved animations with reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile-specific optimizations for small screens */
+@media (max-width: 480px) {
+  /* Further reduce font sizes for very small screens */
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  /* Optimize buttons for small screens */
+  .button-primary, .button-secondary {
+    @apply px-3 py-2 text-xs;
+  }
+
+  /* Reduce padding for better space usage */
+  .py-12 {
+    @apply py-8;
+  }
+
+  .px-4 {
+    @apply px-3;
+  }
+
+  /* Optimize card display */
+  .card {
+    @apply rounded-lg;
+  }
+
+  /* Improve touch targets */
+  .nav-link {
+    @apply py-3;
+  }
+
+  /* Optimize animations for better performance on mobile */
+  [class*="animate-"] {
+    animation-duration: 0.3s !important;
+  }
+
+  /* Ensure menu animations work properly */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out forwards !important;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulseSoft 1.5s ease-in-out infinite !important;
+  }
+
+  .animate-spin-once {
+    animation: spinOnce 0.3s ease-out forwards !important;
+  }
+
+  /* Optimize background effects */
+  [class*="blur-"] {
+    @apply hidden;
+  }
+
+  /* Ensure content is readable */
+  .text-sm {
+    @apply text-base;
+  }
+}
+
+/* iOS and Android specific optimizations */
+@media (max-width: 767px) {
+  /* Prevent text size adjustment on orientation change */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Improve tap targets for mobile */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+
+  /* Fix for iOS Safari's 100vh issue */
+  .h-screen, .min-h-screen {
+    height: -webkit-fill-available;
+  }
+
+  /* Prevent pull-to-refresh on iOS */
+  body {
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Improve button touch feedback */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fix for position:fixed elements on iOS */
+  .fixed {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  /* Ensure proper rendering on Android */
+  * {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Improve scrolling performance */
+  .overflow-y-auto, .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Smooth theme transition */
+.theme-transition {
+  @apply transition-all duration-300;
+}
+
+/* Hardware accelerated animations */
+.hardware-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Improved animations */
+@keyframes gradient {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 8s linear infinite;
+}
+
+/* Animations */
+@keyframes badge {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-1px);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-badge {
+  animation: badge 3s ease-in-out infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Pricing Card Animations */
+@keyframes border-fire {
+  0%, 100% {
+    border-color: rgba(249, 115, 22, 0.5);
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  }
+}
+
+/* Game Controls Styles - Optimized for Android */
+.game-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.control-button {
+  width: 70px;
+  height: 70px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 3px solid #7B4ED8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
+  touch-action: manipulation;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+  margin: 0 25px; /* Increased horizontal spacing between buttons */
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.control-button-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7B4ED8, #9C5FE9);
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.control-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+.control-button:active .control-button-inner {
+  transform: scale(0.95);
+}
+
+.control-arrow {
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+/* Ensure controls are visible on small screens */
+@media (max-width: 480px) {
+  .game-controls {
+    bottom: 20px;
+  }
+
+  .control-button {
+    width: 65px;
+    height: 65px;
+    margin: 0 20px;
+    border-width: 3px;
+  }
+
+  .control-arrow {
+    font-size: 28px;
+  }
+}
+
+@keyframes border-pulse {
+  0%, 100% {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    border-color: rgba(6, 182, 212, 0.5);
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.5);
+  }
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+  }
+}
+
+@keyframes text-fire {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes fire-blur {
+  0%, 100% {
+    opacity: 0.5;
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(15px);
+  }
+}
+
+.animate-border-fire {
+  animation: border-fire 3s infinite;
+}
+
+.animate-border-pulse {
+  animation: border-pulse 3s infinite;
+}
+
+.animate-border-glow {
+  animation: border-glow 3s infinite;
+}
+
+.animate-text-fire {
+  animation: text-fire 3s infinite;
+  background-size: 200% auto;
+}
+
+.animate-fire-blur {
+  animation: fire-blur 3s infinite;
+}
+
+/* Aura Animations */
+@keyframes aura-inferno {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes aura-electric {
+  0% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes aura-cosmic {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.6;
+  }
+  33% {
+    transform: scale(1.1) rotate(120deg);
+    opacity: 0.8;
+  }
+  66% {
+    transform: scale(1.05) rotate(240deg);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0.6;
+  }
+}
+
+@keyframes aura-sparkles {
+  0%, 100% {
+    transform: scale(1);
+    filter: blur(10px);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    filter: blur(15px);
+    opacity: 0.8;
+  }
+}
+
+@keyframes border-sparkle {
+  0%, 100% {
+    border-color: rgba(236, 72, 153, 0.5);
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+  }
+  50% {
+    border-color: rgba(244, 63, 94, 0.5);
+    box-shadow: 0 0 25px rgba(244, 63, 94, 0.5);
+  }
+}
+
+@keyframes text-sparkle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-aura-inferno {
+  animation: aura-inferno 3s ease-in-out infinite;
+}
+
+.animate-aura-electric {
+  animation: aura-electric 3s linear infinite;
+}
+
+.animate-aura-cosmic {
+  animation: aura-cosmic 6s linear infinite;
+}
+
+.animate-aura-sparkles {
+  animation: aura-sparkles 3s ease-in-out infinite;
+}
+
+.animate-border-sparkle {
+  animation: border-sparkle 3s infinite;
+}
+
+.animate-text-sparkle {
+  animation: text-sparkle 2s ease-in-out infinite;
+}
+
+/* Flame Animations */
+@keyframes flame-base {
+  0%, 100% {
+    transform: scale(1) rotate(-1deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(1deg);
+  }
+}
+
+@keyframes flame-particle {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-40px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes spark {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-flame-base {
+  animation: flame-base 3s ease-in-out infinite;
+}
+
+.animate-flame-particle-main {
+  animation: flame-particle 2s ease-out infinite;
+}
+
+.animate-flame-particle-left {
+  animation: flame-particle 2.2s ease-out infinite;
+}
+
+.animate-flame-particle-right {
+  animation: flame-particle 2.4s ease-out infinite;
+}
+
+.animate-flame-small-1 { animation: flame-particle 1.8s ease-out infinite; }
+.animate-flame-small-2 { animation: flame-particle 1.9s ease-out infinite; }
+.animate-flame-small-3 { animation: flame-particle 2.0s ease-out infinite; }
+.animate-flame-small-4 { animation: flame-particle 2.1s ease-out infinite; }
+.animate-flame-small-5 { animation: flame-particle 2.2s ease-out infinite; }
+.animate-flame-small-6 { animation: flame-particle 2.3s ease-out infinite; }
+
+.animate-flame-glow-slow {
+  animation: flame-base 4s ease-in-out infinite;
+}
+
+.animate-flame-glow-fast {
+  animation: flame-base 3s ease-in-out infinite reverse;
+}
+
+.flame-particle {
+  background: linear-gradient(to top, transparent, #f97316, #fbbf24);
+  border-radius: 50% 50% 20% 20%;
+  filter: blur(4px);
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+}
+
+/* Enhanced Flame Animations */
+.flame-particle {
+  background: linear-gradient(to top, transparent, #f97316, #fbbf24);
+  border-radius: 50% 50% 20% 20%;
+  filter: blur(4px);
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Ensure text stays sharp */
+.relative > * {
+  isolation: isolate;
+}
+
+/* Pricing card content should stay above effects */
+[class*="backdrop-blur"] {
+  isolation: isolate;
+  z-index: 1;
+}
+
+/* Keep text sharp in cards */
+.rounded-2xl {
+  isolation: isolate;
+}
+
+/* Ensure flame effects stay behind content */
+[class*="flame-particle"],
+[class*="animate-flame"],
+.spark {
+  z-index: -1;
+}
+
+/* Ensure glow effects don't affect text */
+[class*="animate-flame-glow"] {
+  pointer-events: none;
+  z-index: -1;
+}
+
+@layer utilities {
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle at center, var(--tw-gradient-from) 0%, var(--tw-gradient-via) 50%, var(--tw-gradient-to) 100%);
+  }
+}
+
+/* Improved shadow effects for fire theme */
+.shadow-orange-500\/20 {
+  --tw-shadow-color: rgb(249 115 22 / 0.2);
+  --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow-orange-500\/30 {
+  --tw-shadow-color: rgb(249 115 22 / 0.3);
+  --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+@keyframes flame-base {
+  0%, 100% {
+    transform: scale(1) rotate(-1deg);
+    filter: blur(8px) brightness(1);
+  }
+  50% {
+    transform: scale(1.1) rotate(1deg);
+    filter: blur(10px) brightness(1.2);
+  }
+}
+
+@keyframes flame-particle-main {
+  0%, 100% {
+    transform: translateY(0) translateX(-50%) scaleY(1) rotate(-2deg);
+    opacity: 0.9;
+    filter: brightness(1);
+  }
+  50% {
+    transform: translateY(-35px) translateX(-50%) scaleY(1.4) rotate(2deg);
+    opacity: 0.7;
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes flame-particle-left {
+  0%, 100% {
+    transform: translateY(0) scaleY(1) rotate(-8deg) translateX(5px);
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  50% {
+    transform: translateY(-30px) scaleY(1.3) rotate(-12deg) translateX(-5px);
+    opacity: 0.6;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes flame-particle-right {
+  0%, 100% {
+    transform: translateY(0) scaleY(1) rotate(8deg) translateX(-5px);
+    opacity: 0.8;
+    filter: brightness(1);
+  }
+  50% {
+    transform: translateY(-30px) scaleY(1.3) rotate(12deg) translateX(5px);
+    opacity: 0.6;
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes flame-small {
+  0%, 100% {
+    transform: translateY(0) scaleY(1) rotate(var(--rotate-start, 0deg)) translateX(var(--translate-x-start, 0));
+    opacity: var(--opacity-start, 0.8);
+    filter: brightness(1);
+  }
+  50% {
+    transform: translateY(var(--translate-y, -20px)) scaleY(var(--scale-y, 1.2))
+               rotate(var(--rotate-mid, 0deg)) translateX(var(--translate-x-mid, 0));
+    opacity: var(--opacity-mid, 0.6);
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes spark-float {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 20px), var(--ty, -40px)) scale(0) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+@keyframes flame-glow-slow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+    filter: blur(20px) brightness(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.15);
+    filter: blur(24px) brightness(1.2);
+  }
+}
+
+@keyframes flame-glow-fast {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1.1);
+    filter: blur(16px) brightness(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.25);
+    filter: blur(20px) brightness(1.3);
+  }
+}
+
+.animate-flame-base {
+  animation: flame-base 3s ease-in-out infinite;
+}
+
+.animate-flame-particle-main {
+  animation: flame-particle-main 2s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #f97316, #fbbf24);
+}
+
+.animate-flame-particle-left {
+  animation: flame-particle-left 2.2s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #ef4444, #f97316);
+  animation-delay: -0.3s;
+}
+
+.animate-flame-particle-right {
+  animation: flame-particle-right 2.2s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #ef4444, #f97316);
+  animation-delay: -0.5s;
+}
+
+.animate-flame-small-1 {
+  --rotate-start: -8deg; --rotate-mid: -12deg;
+  --translate-y: -25px; --translate-x-start: 5px; --translate-x-mid: -5px;
+  --opacity-start: 0.7; --opacity-mid: 0.5;
+  animation: flame-small 1.8s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #ef4444, #f97316);
+}
+
+.animate-flame-small-2 {
+  --rotate-start: 8deg; --rotate-mid: 12deg;
+  --translate-y: -30px; --translate-x-start: -5px; --translate-x-mid: 5px;
+  --opacity-start: 0.8; --opacity-mid: 0.6;
+  animation: flame-small 2s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #f97316, #fbbf24);
+}
+
+.animate-flame-small-3 {
+  --rotate-start: -6deg; --rotate-mid: -10deg;
+  --translate-y: -20px; --translate-x-start: 3px; --translate-x-mid: -3px;
+  --opacity-start: 0.6; --opacity-mid: 0.4;
+  animation: flame-small 1.9s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #dc2626, #ef4444);
+}
+
+.animate-flame-small-4 {
+  --rotate-start: 6deg; --rotate-mid: 10deg;
+  --translate-y: -28px; --translate-x-start: -3px; --translate-x-mid: 3px;
+  --opacity-start: 0.7; --opacity-mid: 0.5;
+  animation: flame-small 2.1s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #f97316, #fbbf24);
+}
+
+.animate-flame-small-5 {
+  --rotate-start: -10deg; --rotate-mid: -14deg;
+  --translate-y: -22px; --translate-x-start: 4px; --translate-x-mid: -4px;
+  --opacity-start: 0.8; --opacity-mid: 0.6;
+  animation: flame-small 1.7s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #ef4444, #f97316);
+}
+
+.animate-flame-small-6 {
+  --rotate-start: 10deg; --rotate-mid: 14deg;
+  --translate-y: -26px; --translate-x-start: -4px; --translate-x-mid: 4px;
+  --opacity-start: 0.7; --opacity-mid: 0.5;
+  animation: flame-small 2.2s ease-in-out infinite;
+  background: linear-gradient(to top, transparent, #f97316, #fbbf24);
+}
+
+.spark {
+  --tx: 0;
+  --ty: 0;
+  animation: spark-float 2s ease-out infinite;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.animate-flame-glow-slow {
+  animation: flame-glow-slow 3s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+
+.animate-flame-glow-fast {
+  animation: flame-glow-fast 2s ease-in-out infinite;
+  mix-blend-mode: screen;
+}

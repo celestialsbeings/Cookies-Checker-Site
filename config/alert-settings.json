@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "telegramEnabled": true,
+  "threshold": 15
+}
