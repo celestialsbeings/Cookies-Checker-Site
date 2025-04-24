@@ -1,52 +1,76 @@
-# Cookie Catcher v2.0
+# 🍪 Cookie Catcher v2.0
 
-A modern web application for cookie management and distribution with an interactive game interface and comprehensive admin panel.
+<div align="center">
 
-## Features
+  ![Cookie Catcher Logo](https://img.shields.io/badge/🍪-Cookie%20Catcher-C084FC?style=for-the-badge)
 
-- Interactive Cookie Catcher game for users to earn and claim cookies
-- Secure token-based cookie claiming system
-- Modern, responsive UI with dark theme and animations
-- Comprehensive admin panel for cookie management
-- Google AdSense integration for monetization
-- Optimized for both desktop and mobile devices
+  [![Node.js](https://img.shields.io/badge/Node.js-18.x-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
+  [![React](https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react&logoColor=white)](https://reactjs.org)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+  [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-## Requirements
+  *A modern web application for cookie management and distribution with an interactive game interface and comprehensive admin panel.*
+</div>
 
-- Node.js 18.x or higher
-- npm 8.x or higher
-- Linux server (for production deployment)
-- Domain with HTTPS for AdSense integration (production)
+<p align="center">
+  <img src="https://img.shields.io/badge/🎮-Interactive%20Game-00FFFF?style=flat-square" alt="Interactive Game">
+  <img src="https://img.shields.io/badge/🔒-Secure%20Token%20System-C084FC?style=flat-square" alt="Secure Token System">
+  <img src="https://img.shields.io/badge/🌙-Dark%20Theme-0A0A0A?style=flat-square" alt="Dark Theme">
+  <img src="https://img.shields.io/badge/📱-Mobile%20Optimized-00FFFF?style=flat-square" alt="Mobile Optimized">
+</p>
 
-## Local Development Setup (Windows)
+---
 
-1. Clone the repository:
-   ```
+## ✨ Features
+
+- 🎮 **Interactive Cookie Catcher Game** - Fun way for users to earn and claim cookies
+- 🔒 **Secure Token-Based System** - Prevents unauthorized cookie claiming
+- 🌙 **Modern Dark UI** - Sleek interface with animations and responsive design
+- 🛠️ **Comprehensive Admin Panel** - Complete cookie management dashboard
+- 💰 **Google AdSense Integration** - Built-in monetization capabilities
+- 📱 **Mobile Optimized** - Perfect experience on both desktop and mobile devices
+- ⚡ **High Performance** - Optimized for speed and efficiency
+
+## 🚀 Getting Started
+
+### 📋 Requirements
+
+- 📦 Node.js 18.x or higher
+- 📦 npm 8.x or higher
+- 🖥️ Linux server (for production deployment)
+- 🔐 Domain with HTTPS for AdSense integration (production)
+
+### 💻 Local Development Setup (Windows)
+
+1. **Clone the repository:**
+   ```bash
    git clone <repository-url>
    cd cookie-catcher
    ```
 
-2. Install dependencies:
-   ```
+2. **Install dependencies:**
+   ```bash
    npm install
    ```
 
-3. Create necessary directories (if they don't exist):
-   ```
+3. **Create necessary directories:**
+   ```bash
    mkdir -p valid-cookies cookie-backups temp-uploads
    ```
 
-4. Start the unified development server:
-   ```
+4. **Start the development server:**
+   ```bash
    npm run dev
    ```
 
    Or run the unified server directly:
-   ```
+   ```bash
    node unified-server.js
    ```
 
-5. Access the application at http://localhost:8080
+5. **Access the application:**
+
+   🌐 [http://localhost:8080](http://localhost:8080)
 
 ## Production Deployment on Linux
 
@@ -136,68 +160,62 @@ A modern web application for cookie management and distribution with an interact
    pm2 save
    ```
 
-### Step 3: Nginx Configuration (Recommended)
+### Step 3: Apache Configuration with Cloudflare
 
-1. Install Nginx:
+Since you're using Cloudflare as your proxy with Apache and port 8080 is already forwarded, you need to configure Apache to proxy requests to your Node.js application.
+
+1. Ensure Apache is installed and the required modules are enabled:
    ```bash
-   sudo apt install -y nginx
+   sudo apt install -y apache2
+   sudo a2enmod proxy proxy_http proxy_wstunnel headers
    ```
 
-2. Create an Nginx configuration file:
+2. Create an Apache configuration file:
    ```bash
-   sudo nano /etc/nginx/sites-available/cookie-catcher
+   sudo nano /etc/apache2/sites-available/cookie-catcher.conf
    ```
 
 3. Add the following configuration (replace yourdomain.com with your actual domain):
-   ```nginx
-   server {
-       listen 80;
-       server_name yourdomain.com www.yourdomain.com;
+   ```apache
+   <VirtualHost *:80>
+       ServerName yourdomain.com
+       ServerAlias www.yourdomain.com
 
-       # Redirect HTTP to HTTPS
-       return 301 https://$host$request_uri;
-   }
-
-   server {
-       listen 443 ssl;
-       server_name yourdomain.com www.yourdomain.com;
-
-       # SSL configuration
-       ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+       # Cloudflare handles SSL, so we don't need to redirect to HTTPS here
 
        # Security headers
-       add_header X-Frame-Options "SAMEORIGIN";
-       add_header X-Content-Type-Options "nosniff";
-       add_header X-XSS-Protection "1; mode=block";
+       Header always set X-Frame-Options "SAMEORIGIN"
+       Header always set X-Content-Type-Options "nosniff"
+       Header always set X-XSS-Protection "1; mode=block"
 
-       # Proxy to Node.js application
-       location / {
-           proxy_pass http://localhost:8080;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header X-Forwarded-Proto $scheme;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
+       # Proxy to Node.js application running on port 8080
+       ProxyPreserveHost On
+       ProxyPass / http://localhost:8080/
+       ProxyPassReverse / http://localhost:8080/
+
+       # WebSocket support (if needed)
+       RewriteEngine On
+       RewriteCond %{HTTP:Upgrade} =websocket [NC]
+       RewriteRule /(.*) ws://localhost:8080/$1 [P,L]
+
+       # Logging
+       ErrorLog ${APACHE_LOG_DIR}/cookie-catcher-error.log
+       CustomLog ${APACHE_LOG_DIR}/cookie-catcher-access.log combined
+   </VirtualHost>
    ```
 
-4. Enable the site and restart Nginx:
+4. Enable the site and restart Apache:
    ```bash
-   sudo ln -s /etc/nginx/sites-available/cookie-catcher /etc/nginx/sites-enabled/
-   sudo nginx -t
-   sudo systemctl restart nginx
+   sudo a2ensite cookie-catcher.conf
+   sudo apache2ctl configtest
+   sudo systemctl restart apache2
    ```
 
-5. Set up SSL with Let's Encrypt:
-   ```bash
-   sudo apt install -y certbot python3-certbot-nginx
-   sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
-   ```
+5. Cloudflare Configuration:
+   - Ensure your domain is properly set up in Cloudflare
+   - In the DNS settings, make sure you have an A record pointing to your server's IP address
+   - In the SSL/TLS section, set the encryption mode to "Full" or "Full (strict)" if you have SSL on your server
+   - In the Page Rules section, you can create rules for caching if needed
 
 ### Step 4: Firewall Configuration
 

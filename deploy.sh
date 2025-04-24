@@ -113,6 +113,54 @@ chmod +x backup.sh
 echo "Setting up cron job for daily backups..."
 (crontab -l 2>/dev/null || echo "") | grep -v "/var/www/cookie-catcher/backup.sh" | { cat; echo "0 2 * * * $APP_DIR/backup.sh"; } | crontab -
 
+# Check if Apache is installed and configure it
+if command -v apache2 &> /dev/null; then
+  echo "Configuring Apache..."
+
+  # Enable required modules
+  a2enmod proxy proxy_http proxy_wstunnel headers rewrite
+
+  # Create Apache configuration file
+  cat > /etc/apache2/sites-available/cookie-catcher.conf << 'EOL'
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html
+
+    # Security headers
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Proxy to Node.js application running on port 8080
+    ProxyPreserveHost On
+    ProxyPass / http://localhost:8080/
+    ProxyPassReverse / http://localhost:8080/
+
+    # WebSocket support (if needed)
+    RewriteEngine On
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule /(.*) ws://localhost:8080/$1 [P,L]
+
+    # Logging
+    ErrorLog ${APACHE_LOG_DIR}/cookie-catcher-error.log
+    CustomLog ${APACHE_LOG_DIR}/cookie-catcher-access.log combined
+</VirtualHost>
+EOL
+
+  # Enable the site
+  a2ensite cookie-catcher.conf
+
+  # Test the configuration
+  apache2ctl configtest
+
+  # Restart Apache
+  systemctl restart apache2
+
+  echo "Apache configured successfully."
+else
+  echo "Apache is not installed. Skipping Apache configuration."
+fi
+
 # Print completion message
 echo "=================================================="
 echo "  Deployment completed successfully!"
@@ -124,8 +172,7 @@ echo "To view logs: pm2 logs $PM2_PROCESS_NAME"
 echo "To restart: pm2 restart $PM2_PROCESS_NAME"
 echo ""
 echo "Next steps:"
-echo "1. Configure Nginx as a reverse proxy (recommended)"
-echo "2. Set up SSL with Let's Encrypt"
-echo "3. Configure your domain to point to this server"
-echo "4. Update your AdSense configuration if needed"
+echo "1. Ensure Cloudflare is properly configured to proxy to your server"
+echo "2. Verify that port 8080 is properly forwarded through Cloudflare"
+echo "3. Update your AdSense configuration if needed"
 echo "=================================================="
