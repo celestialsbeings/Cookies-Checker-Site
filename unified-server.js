@@ -157,7 +157,7 @@ app.use((req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
 
   // Add Content-Security-Policy header to allow connections to the same origin
-  res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:8080 http://192.168.109.171:8080; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagservices.com https://www.google-analytics.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com;");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; connect-src 'self' http://localhost:3000 http://192.168.109.171:3000; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagservices.com https://www.google-analytics.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com;");
 
   next();
 });
@@ -182,8 +182,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Define the port - use 8080 for Cloudflare
-const PORT = process.env.PORT || 8080;
+// Define the port - use 3000 to avoid conflict with Apache on 8080
+const PORT = 3000;
 
 // Define the cookies directory
 const COOKIES_DIR = path.join(process.cwd(), 'valid-cookies');
