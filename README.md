@@ -72,23 +72,26 @@
 
    🌐 [http://localhost:8080](http://localhost:8080)
 
-## Production Deployment on Linux
+## 🖥️ Production Deployment on Linux
 
-### Prerequisites
+### 📋 Prerequisites
 
-- A Linux server (Ubuntu 20.04 LTS or later recommended)
-- Node.js 18.x or later installed
-- A domain name with HTTPS configured (for AdSense)
-- Root or sudo access
+- 🐧 A Linux server (Ubuntu 20.04 LTS or later recommended)
+- 📦 Node.js 18.x or later installed
+- 🌐 A domain name with HTTPS configured (for AdSense)
+- 🔑 Root or sudo access
 
-### Step 1: Server Preparation
+### 🔧 Step 1: Server Preparation
 
-1. Update your system:
+<details>
+<summary>📋 Click to expand detailed instructions</summary>
+
+1. **Update your system:**
    ```bash
    sudo apt update && sudo apt upgrade -y
    ```
 
-2. Install Node.js if not already installed:
+2. **Install Node.js if not already installed:**
    ```bash
    # Add NodeSource repository
    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
@@ -101,41 +104,45 @@
    npm -v
    ```
 
-3. Install PM2 for process management:
+3. **Install PM2 for process management:**
    ```bash
    sudo npm install -g pm2
    ```
 
-4. Install required system dependencies:
+4. **Install required system dependencies:**
    ```bash
    sudo apt install -y git build-essential
    ```
+</details>
 
-### Step 2: Application Deployment
+### 📦 Step 2: Application Deployment
 
-1. Clone the repository:
+<details>
+<summary>📋 Click to expand detailed instructions</summary>
+
+1. **Clone the repository:**
    ```bash
    git clone <repository-url> /var/www/cookie-catcher
    cd /var/www/cookie-catcher
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. Build the application:
+3. **Build the application:**
    ```bash
    npm run build
    ```
 
-4. Create necessary directories and set permissions:
+4. **Create necessary directories and set permissions:**
    ```bash
    mkdir -p valid-cookies cookie-backups temp-uploads
    chmod 755 valid-cookies cookie-backups temp-uploads
    ```
 
-5. Create a .env file (optional for custom configuration):
+5. **Create a .env file (optional for custom configuration):**
    ```bash
    touch .env
    nano .env
@@ -148,34 +155,38 @@
    VITE_GOOGLE_AD_SLOT=your-adsense-slot-id
    ```
 
-6. Start the application with PM2:
+6. **Start the application with PM2:**
    ```bash
    pm2 start unified-server.js --name cookie-catcher
    ```
 
-7. Configure PM2 to start on system boot:
+7. **Configure PM2 to start on system boot:**
    ```bash
    pm2 startup
    # Run the command that PM2 outputs
    pm2 save
    ```
+</details>
 
-### Step 3: Apache Configuration with Cloudflare
+### 🌐 Step 3: Apache Configuration with Cloudflare
+
+<details>
+<summary>📋 Click to expand detailed instructions</summary>
 
 Since you're using Cloudflare as your proxy with Apache and port 8080 is already forwarded, you need to configure Apache to proxy requests to your Node.js application.
 
-1. Ensure Apache is installed and the required modules are enabled:
+1. **Ensure Apache is installed and the required modules are enabled:**
    ```bash
    sudo apt install -y apache2
    sudo a2enmod proxy proxy_http proxy_wstunnel headers
    ```
 
-2. Create an Apache configuration file:
+2. **Create an Apache configuration file:**
    ```bash
    sudo nano /etc/apache2/sites-available/cookie-catcher.conf
    ```
 
-3. Add the following configuration (replace yourdomain.com with your actual domain):
+3. **Add the following configuration** (replace yourdomain.com with your actual domain):
    ```apache
    <VirtualHost *:80>
        ServerName yourdomain.com
@@ -204,95 +215,126 @@ Since you're using Cloudflare as your proxy with Apache and port 8080 is already
    </VirtualHost>
    ```
 
-4. Enable the site and restart Apache:
+4. **Enable the site and restart Apache:**
    ```bash
    sudo a2ensite cookie-catcher.conf
    sudo apache2ctl configtest
    sudo systemctl restart apache2
    ```
 
-5. Cloudflare Configuration:
-   - Ensure your domain is properly set up in Cloudflare
-   - In the DNS settings, make sure you have an A record pointing to your server's IP address
-   - In the SSL/TLS section, set the encryption mode to "Full" or "Full (strict)" if you have SSL on your server
-   - In the Page Rules section, you can create rules for caching if needed
+5. **Cloudflare Configuration:**
+   - ✅ Ensure your domain is properly set up in Cloudflare
+   - ✅ In the DNS settings, make sure you have an A record pointing to your server's IP address
+   - ✅ In the SSL/TLS section, set the encryption mode to "Full" or "Full (strict)" if you have SSL on your server
+   - ✅ In the Page Rules section, you can create rules for caching if needed
+</details>
 
-### Step 4: Firewall Configuration
+### 🔒 Step 4: Firewall Configuration
 
-1. Configure UFW (Uncomplicated Firewall):
+<details>
+<summary>📋 Click to expand detailed instructions</summary>
+
+1. **Configure UFW (Uncomplicated Firewall):**
    ```bash
    sudo ufw allow 22/tcp    # SSH
    sudo ufw allow 80/tcp    # HTTP
    sudo ufw allow 443/tcp   # HTTPS
    sudo ufw enable
    ```
+</details>
 
-### Step 5: Monitoring and Maintenance
+### 📊 Step 5: Monitoring and Maintenance
 
-1. Monitor the application logs:
+<details>
+<summary>📋 Click to expand detailed instructions</summary>
+
+1. **Monitor the application logs:**
    ```bash
    pm2 logs cookie-catcher
    ```
 
-2. Set up log rotation:
+2. **Set up log rotation:**
    ```bash
    sudo pm2 install pm2-logrotate
    ```
 
-3. Configure automatic updates:
+3. **Configure automatic updates:**
    ```bash
    sudo apt install -y unattended-upgrades
    sudo dpkg-reconfigure -plow unattended-upgrades
    ```
+</details>
 
-## Directory Structure
+## 📁 Directory Structure
 
-- `valid-cookies/`: Directory where cookie files are stored
-- `cookie-backups/`: Directory for cookie backups
-- `temp-uploads/`: Temporary directory for file uploads
-- `src/`: Source code
-  - `components/`: React components
-    - `Admin/`: Admin panel components
-    - `CookieCatcher/`: Game components
-  - `services/`: Backend services
-  - `pages/`: React pages
-  - `routes/`: React Router routes
+<details>
+<summary>📋 Click to see the project structure</summary>
 
-## Admin Panel
+```
+cookie-catcher/
+├── 🍪 valid-cookies/     # Directory where cookie files are stored
+├── 💾 cookie-backups/    # Directory for cookie backups
+├── 📤 temp-uploads/      # Temporary directory for file uploads
+├── 📂 src/               # Source code
+│   ├── 🧩 components/    # React components
+│   │   ├── 🛠️ Admin/     # Admin panel components
+│   │   └── 🎮 CookieCatcher/ # Game components
+│   ├── 🔌 services/      # Backend services
+│   ├── 📄 pages/         # React pages
+│   └── 🛣️ routes/        # React Router routes
+└── 📜 unified-server.js  # Main server file
+```
+</details>
+
+## 🛠️ Admin Panel
+
+<div align="center">
+  <img src="https://img.shields.io/badge/🔐-Admin%20Panel-C084FC?style=for-the-badge" alt="Admin Panel">
+</div>
 
 The admin panel is accessible at `/admin` and provides the following features:
 
-- Dashboard with system overview
-- Cookie management (upload, delete)
-- System status monitoring
-- Settings configuration
+- 📊 **Dashboard** with system overview
+- 🍪 **Cookie Management** (upload, delete)
+- 📈 **System Status** monitoring
+- ⚙️ **Settings** configuration
 
-Default admin credentials:
-- Username: `admin`
-- Password: `admin123`
+<details>
+<summary>🔑 Default admin credentials</summary>
 
-**Important:** Change these credentials in production by modifying the `unified-server.js` file.
+- 👤 Username: `admin`
+- 🔒 Password: `admin123`
 
-## Managing the Application
+⚠️ **Important:** Change these credentials in production by modifying the `unified-server.js` file.
+</details>
+
+## 🔄 Managing the Application
 
 After deployment, you can manage the application using PM2:
 
-- Check status: `pm2 status`
-- View logs: `pm2 logs cookie-catcher`
-- Restart application: `pm2 restart cookie-catcher`
-- Stop application: `pm2 stop cookie-catcher`
-- Update application:
-  ```bash
-  cd /var/www/cookie-catcher
-  git pull
-  npm install
-  npm run build
-  pm2 restart cookie-catcher
-  ```
+| Command | Description |
+|---------|-------------|
+| `pm2 status` | 📊 Check application status |
+| `pm2 logs cookie-catcher` | 📜 View application logs |
+| `pm2 restart cookie-catcher` | 🔄 Restart application |
+| `pm2 stop cookie-catcher` | ⏹️ Stop application |
 
-## Troubleshooting
+<details>
+<summary>🔄 How to update the application</summary>
 
-### Permission Issues
+```bash
+cd /var/www/cookie-catcher
+git pull
+npm install
+npm run build
+pm2 restart cookie-catcher
+```
+</details>
+
+## ⚠️ Troubleshooting
+
+<details>
+<summary>🔧 Permission Issues</summary>
 
 If you encounter permission issues:
 
@@ -304,16 +346,20 @@ sudo chown -R $(whoami):$(whoami) valid-cookies cookie-backups temp-uploads
 # Set proper permissions
 chmod 755 valid-cookies cookie-backups temp-uploads
 ```
+</details>
 
-### Port Already in Use
+<details>
+<summary>🔌 Port Already in Use</summary>
 
 If port 8080 is already in use:
 
 1. Edit the `.env` file and change the `PORT` value
 2. Restart the application: `pm2 restart cookie-catcher`
-3. Update your Nginx configuration to point to the new port
+3. Update your Apache configuration to point to the new port
+</details>
 
-### Application Not Starting
+<details>
+<summary>🚫 Application Not Starting</summary>
 
 Check the logs for errors:
 ```bash
@@ -321,32 +367,36 @@ pm2 logs cookie-catcher
 ```
 
 Common issues:
-- Missing dependencies: Run `npm install`
-- Build errors: Run `npm run build` and check for errors
-- Permission issues: See the permission troubleshooting section
+- 📦 Missing dependencies: Run `npm install`
+- 🏗️ Build errors: Run `npm run build` and check for errors
+- 🔒 Permission issues: See the permission troubleshooting section
+</details>
 
-### Nginx Configuration Issues
+<details>
+<summary>🌐 Apache Configuration Issues</summary>
 
-Test your Nginx configuration:
+Test your Apache configuration:
 ```bash
-sudo nginx -t
+sudo apache2ctl configtest
 ```
 
-If there are errors, fix them and restart Nginx:
+If there are errors, fix them and restart Apache:
 ```bash
-sudo systemctl restart nginx
+sudo systemctl restart apache2
 ```
+</details>
 
-## Backup and Restore
+## 💾 Backup and Restore
 
-### Backup
+<details>
+<summary>📤 Backup</summary>
 
-1. Create a backup script:
+1. **Create a backup script:**
    ```bash
    nano backup.sh
    ```
 
-2. Add the following content:
+2. **Add the following content:**
    ```bash
    #!/bin/bash
    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
@@ -364,12 +414,12 @@ sudo systemctl restart nginx
    echo "Backup completed: $BACKUP_DIR/cookies_$TIMESTAMP.tar.gz and $BACKUP_DIR/app_$TIMESTAMP.tar.gz"
    ```
 
-3. Make it executable:
+3. **Make it executable:**
    ```bash
    chmod +x backup.sh
    ```
 
-4. Set up a cron job for automatic backups:
+4. **Set up a cron job for automatic backups:**
    ```bash
    crontab -e
    ```
@@ -378,15 +428,17 @@ sudo systemctl restart nginx
    ```
    0 2 * * * /var/www/cookie-catcher/backup.sh
    ```
+</details>
 
-### Restore
+<details>
+<summary>📥 Restore</summary>
 
-1. Restore cookies:
+1. **Restore cookies:**
    ```bash
    tar -xzf /var/backups/cookie-catcher/cookies_TIMESTAMP.tar.gz -C /var/www/cookie-catcher
    ```
 
-2. Restore application:
+2. **Restore application:**
    ```bash
    tar -xzf /var/backups/cookie-catcher/app_TIMESTAMP.tar.gz -C /var/www/cookie-catcher
    cd /var/www/cookie-catcher
@@ -394,7 +446,26 @@ sudo systemctl restart nginx
    npm run build
    pm2 restart cookie-catcher
    ```
+</details>
 
-## License
+<div align="center">
 
-[MIT License](LICENSE)
+## 📜 License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+</div>
+
+---
+
+<div align="center">
+  <p>
+    <img src="https://img.shields.io/badge/Made%20with%20❤️%20by-Celestial%20Team-C084FC?style=flat-square" alt="Made with love">
+  </p>
+
+  <p>
+    <a href="https://github.com/yourusername/cookie-catcher">
+      <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=flat-square&logo=github" alt="GitHub Repository">
+    </a>
+  </p>
+</div>
