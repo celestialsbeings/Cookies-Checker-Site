@@ -1,4 +1,4 @@
-import { API_URL } from '../config';
+import { API_URL } from '../config.browser';
 
 // Interface for game win response
 interface GameWinResponse {

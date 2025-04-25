@@ -15,7 +15,9 @@
   },
   "include": [
     "src/services/**/*.ts",
-    "src/config.ts"
+    "src/config.ts",
+    "src/config.browser.ts",
+    "src/vite-env.d.ts"
   ],
   "exclude": ["node_modules"]
 }
