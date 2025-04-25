@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, DragEvent } from 'react';
-import { Upload, X, AlertTriangle, Check, Trash2, FileUp } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Upload, X, AlertTriangle, Check, Trash2, FileUp, Database } from 'lucide-react';
 import {
   checkCookiesAvailable,
   uploadCookiesZip,
   uploadCookieFile,
-  clearAllCookies
+  clearAllCookies,
+  createBackup
 } from '../../services/adminService';
 
 const CookieManager: React.FC = () => {
@@ -14,6 +15,9 @@ const CookieManager: React.FC = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isClearing, setIsClearing] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [backupSuccess, setBackupSuccess] = useState<string | null>(null);
+  const [backupError, setBackupError] = useState<string | null>(null);
   const zipFileInputRef = useRef<HTMLInputElement>(null);
   const txtFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,6 +63,28 @@ const CookieManager: React.FC = () => {
       setUploadError(error instanceof Error ? error.message : 'Failed to clear cookies');
     } finally {
       setIsClearing(false);
+    }
+  };
+
+  // Handle backup creation
+  const handleBackup = async () => {
+    try {
+      setIsBackingUp(true);
+      setBackupError(null);
+      setBackupSuccess(null);
+
+      const result = await createBackup();
+
+      if (result.success) {
+        setBackupSuccess(result.message);
+      } else {
+        setBackupError(result.message || 'Failed to create backup');
+      }
+    } catch (error) {
+      console.error('Error creating backup:', error);
+      setBackupError(error instanceof Error ? error.message : 'Failed to create backup');
+    } finally {
+      setIsBackingUp(false);
     }
   };
 
@@ -364,6 +390,64 @@ const CookieManager: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Backup Section */}
+      <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-lg mb-6">
+        <h2 className="text-lg font-medium text-gray-200 mb-4">Cookie Backups</h2>
+        <p className="text-sm text-gray-400 mb-4">
+          Create a backup of all cookie files. Backups are stored on the server and can be used for recovery.
+        </p>
+
+        {/* Success Message */}
+        {backupSuccess && (
+          <div className="mb-4 p-3 bg-green-900/20 border border-green-700 rounded-lg text-green-400 flex items-start">
+            <Check size={18} className="mr-2 mt-0.5 flex-shrink-0" />
+            <div>{backupSuccess}</div>
+            <button
+              onClick={() => setBackupSuccess(null)}
+              className="ml-auto text-green-500 hover:text-green-400"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {backupError && (
+          <div className="mb-4 p-3 bg-red-900/20 border border-red-700 rounded-lg text-red-400 flex items-start">
+            <AlertTriangle size={18} className="mr-2 mt-0.5 flex-shrink-0" />
+            <div>{backupError}</div>
+            <button
+              onClick={() => setBackupError(null)}
+              className="ml-auto text-red-500 hover:text-red-400"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={handleBackup}
+          disabled={isBackingUp}
+          className={`py-2 px-4 rounded-lg flex items-center ${
+            isBackingUp
+              ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+              : 'bg-purple-600 hover:bg-purple-700 text-white'
+          }`}
+        >
+          {isBackingUp ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+              Creating Backup...
+            </>
+          ) : (
+            <>
+              <Database size={18} className="mr-2" />
+              Create Backup
+            </>
+          )}
+        </button>
       </div>
 
       {/* Clear Cookies Section */}

@@ -1,7 +1,5 @@
-import React from 'react';
 import {
   Bot,
-  Github,
   ExternalLink,
   Cookie,
   FileJson,
@@ -11,14 +9,13 @@ import {
   ChevronRight,
   MessageCircle,
   Wallet,
-  CreditCard as PaymentIcon,
   DollarSign,
   Key,
   Send,
   Shield,
   Zap,
-  Clock,
   Gamepad,
+  Code,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -681,7 +678,7 @@ function HomePage() {
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-[#C084FC] transition-colors"
               >
-                <Github className="w-5 h-5" />
+                <Code className="w-5 h-5" />
               </a>
               <a
                 href="https://t.me/xelestialsupporttreambot"

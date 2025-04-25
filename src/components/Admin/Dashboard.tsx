@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Cookie, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
-import { getSystemStatus, checkCookiesAvailable } from '../../services/adminService';
+import { Cookie, Activity, AlertTriangle, CheckCircle, Database } from 'lucide-react';
+import { getSystemStatus, checkCookiesAvailable, createBackup } from '../../services/adminService';
 
 const Dashboard: React.FC = () => {
   const [cookieCount, setCookieCount] = useState(0);
@@ -15,16 +15,25 @@ const Dashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [backupStatus, setBackupStatus] = useState<{
+    loading: boolean;
+    success: boolean;
+    message: string;
+  }>({
+    loading: false,
+    success: false,
+    message: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Get cookie count
         const cookieData = await checkCookiesAvailable();
         setCookieCount(cookieData.count);
-        
+
         // Get system status
         const statusData = await getSystemStatus();
         setSystemStatus({
@@ -35,7 +44,7 @@ const Dashboard: React.FC = () => {
             heapTotal: statusData.system.memoryUsage.heapTotal
           }
         });
-        
+
         setError(null);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -46,10 +55,10 @@ const Dashboard: React.FC = () => {
     };
 
     fetchData();
-    
+
     // Refresh data every 30 seconds
     const interval = setInterval(fetchData, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -58,13 +67,49 @@ const Dashboard: React.FC = () => {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     return `${days}d ${hours}h ${minutes}m`;
   };
 
   // Format memory usage to MB
   const formatMemory = (bytes: number) => {
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  };
+
+  // Handle backup creation
+  const handleBackup = async () => {
+    try {
+      setBackupStatus({
+        loading: true,
+        success: false,
+        message: 'Creating backup...'
+      });
+
+      const result = await createBackup();
+
+      setBackupStatus({
+        loading: false,
+        success: true,
+        message: result.message
+      });
+
+      // Reset success message after 5 seconds
+      setTimeout(() => {
+        setBackupStatus(prev => ({
+          ...prev,
+          success: false,
+          message: ''
+        }));
+      }, 5000);
+
+    } catch (err) {
+      console.error('Error creating backup:', err);
+      setBackupStatus({
+        loading: false,
+        success: false,
+        message: err instanceof Error ? err.message : 'Failed to create backup'
+      });
+    }
   };
 
   if (loading) {
@@ -90,7 +135,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-white mb-6">Dashboard</h1>
-      
+
       {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Cookie Status */}
@@ -114,15 +159,15 @@ const Dashboard: React.FC = () => {
             )}
           </div>
           <div className="mt-4">
-            <Link 
-              to="/admin/cookies" 
+            <Link
+              to="/admin/cookies"
               className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
             >
               Manage Cookies →
             </Link>
           </div>
         </div>
-        
+
         {/* System Status */}
         <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-lg">
           <div className="flex items-center justify-between mb-4">
@@ -148,35 +193,50 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-4">
-            <Link 
-              to="/admin/status" 
+            <Link
+              to="/admin/status"
               className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
             >
               View Details →
             </Link>
           </div>
         </div>
-        
+
         {/* Quick Actions */}
         <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-lg">
           <h3 className="text-lg font-medium text-gray-200 mb-4">Quick Actions</h3>
           <div className="space-y-3">
-            <Link 
-              to="/admin/cookies" 
+            <Link
+              to="/admin/cookies"
               className="flex items-center justify-between p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
             >
               <span className="text-gray-200">Upload Cookies</span>
               <Cookie size={18} className="text-purple-400" />
             </Link>
-            <Link 
-              to="/admin/status" 
+            <button
+              onClick={handleBackup}
+              disabled={backupStatus.loading}
+              className="w-full flex items-center justify-between p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="text-gray-200">
+                {backupStatus.loading ? 'Creating Backup...' : 'Create Backup'}
+              </span>
+              <Database size={18} className="text-purple-400" />
+            </button>
+            {backupStatus.message && (
+              <div className={`text-sm p-2 rounded ${backupStatus.success ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
+                {backupStatus.message}
+              </div>
+            )}
+            <Link
+              to="/admin/status"
               className="flex items-center justify-between p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
             >
               <span className="text-gray-200">System Status</span>
               <Activity size={18} className="text-purple-400" />
             </Link>
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center justify-between p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
             >
               <span className="text-gray-200">View Website</span>

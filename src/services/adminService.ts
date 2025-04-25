@@ -38,6 +38,13 @@ interface ClearCookiesResponse {
   message: string;
 }
 
+// Interface for backup response
+interface BackupResponse {
+  success: boolean;
+  message: string;
+  backupPath?: string;
+}
+
 /**
  * Check available cookies
  */
@@ -159,10 +166,36 @@ export const clearAllCookies = async (): Promise<ClearCookiesResponse> => {
   }
 };
 
+/**
+ * Create a backup of all cookies
+ */
+export const createBackup = async (): Promise<BackupResponse> => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/backup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating backup:', error);
+    throw error;
+  }
+};
+
 export default {
   checkCookiesAvailable,
   getSystemStatus,
   uploadCookiesZip,
   uploadCookieFile,
-  clearAllCookies
+  clearAllCookies,
+  createBackup
 };

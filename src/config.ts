@@ -1,6 +1,7 @@
-// Configuration for both API server and Telegram bot
+// Configuration for the Cookie Catcher application
 import path from 'path';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -15,16 +16,8 @@ export const config = {
         return path.join(this.BASE_DIR, 'cookie-backups');
     },
 
-
-    // API Server configuration
-    API_PORT: process.env.API_PORT || 3001,
-    API_HOST: process.env.API_HOST || 'localhost',
-    get API_URL() {
-        return `http://${this.API_HOST}:${this.API_PORT}`;
-    },
-
-    // Telegram Bot configuration
-    TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
+    // Server configuration
+    PORT: process.env.PORT || 3000,
 
     // Cookie management
     COOKIE_FILE_EXTENSION: '.txt',
@@ -33,15 +26,11 @@ export const config = {
     ENDPOINTS: {
         CLAIM_COOKIE: '/api/claim-cookie',
         CHECK_COOKIES: '/api/check-cookies',
-        COOKIES_CLAIM: '/api/cookies/claim',
-        COOKIES_CHECK: '/api/cookies/check'
+        GAME_WIN: '/api/game-win'
     }
 };
 
-
-// Import fs at the top level
-import fs from 'fs';
-
+// Ensure required directories exist
 export const ensureDirectories = () => {
     const dirs = [config.BASE_DIR, config.COOKIES_DIR, config.BACKUP_DIR];
 
@@ -52,16 +41,3 @@ export const ensureDirectories = () => {
         }
     }
 };
-
-// Validate required environment variables
-const validateConfig = () => {
-    const required = ['TELEGRAM_BOT_TOKEN'];
-    const missing = required.filter(key => !process.env[key]);
-
-    if (missing.length > 0) {
-        throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
-    }
-};
-
-// Export both the config object and the validation function
-export { validateConfig };

@@ -6,8 +6,11 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import AdmZip from 'adm-zip';
-import { createWriteStream } from 'fs';
 import { pipeline } from 'stream/promises';
+import compression from 'compression';
+import logger from './src/utils/logger.js';
+import rateLimit from 'express-rate-limit';
+import { scheduleBackups, createBackup } from './src/utils/backup.js';
 
 // Load environment variables
 dotenv.config();
@@ -142,6 +145,9 @@ const securityTokenManager = new SecurityTokenManager();
 // Create rate limiter - allow 1 request per 10 seconds per IP
 const cookieRateLimiter = new RateLimiter(10000, 1);
 
+// Compression middleware
+app.use(compression());
+
 // CORS middleware
 app.use(cors({
   origin: '*',
@@ -188,10 +194,19 @@ const PORT = 3000;
 // Define the cookies directory
 const COOKIES_DIR = path.join(process.cwd(), 'valid-cookies');
 
+// Define the backup directory
+const BACKUP_DIR = path.join(process.cwd(), 'cookie-backups');
+
 // Ensure the cookies directory exists
 if (!fs.existsSync(COOKIES_DIR)) {
   fs.mkdirSync(COOKIES_DIR, { recursive: true });
-  console.log('Created cookies directory:', COOKIES_DIR);
+  logger.info(`Created cookies directory: ${COOKIES_DIR}`);
+}
+
+// Ensure the backup directory exists
+if (!fs.existsSync(BACKUP_DIR)) {
+  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+  logger.info(`Created backup directory: ${BACKUP_DIR}`);
 }
 
 // ===== API ENDPOINTS =====
@@ -342,8 +357,21 @@ app.get('/api/check-cookies', (req, res) => {
 
 // ===== ADMIN API ENDPOINTS =====
 
+// Create admin login rate limiter
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many login attempts, please try again after 15 minutes' },
+  handler: (req, res, options) => {
+    logger.warn(`Rate limit exceeded for admin login: ${req.ip}`);
+    res.status(429).json(options.message);
+  }
+});
+
 // Admin authentication endpoint
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', adminLoginLimiter, (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -353,19 +381,21 @@ app.post('/api/admin/login', (req, res) => {
       // Generate a simple token (in a real app, this would be a JWT)
       const token = `admin-token-${Date.now()}`;
 
+      logger.info(`Admin login successful: ${req.ip}`);
       return res.json({
         success: true,
         token,
         message: 'Login successful'
       });
     } else {
+      logger.warn(`Failed admin login attempt: ${req.ip}, username: ${username}`);
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
       });
     }
   } catch (error) {
-    console.error('Error during login:', error);
+    logger.error('Error during login:', error);
     return res.status(500).json({
       success: false,
       message: 'An unexpected error occurred during login'
@@ -573,7 +603,7 @@ app.post('/api/admin/clear-cookies', (req, res) => {
         fs.unlinkSync(path.join(COOKIES_DIR, file));
         deletedCount++;
       } catch (error) {
-        console.error(`Error deleting cookie file: ${file}`, error);
+        logger.error(`Error deleting cookie file: ${file}`, error);
       }
     }
 
@@ -582,10 +612,41 @@ app.post('/api/admin/clear-cookies', (req, res) => {
       message: `Successfully deleted ${deletedCount} cookie files.`
     });
   } catch (error) {
-    console.error('Error clearing cookies:', error);
+    logger.error('Error clearing cookies:', error);
     return res.status(500).json({
       error: 'Server error',
       message: 'An unexpected error occurred while clearing cookies.'
+    });
+  }
+});
+
+// API endpoint to manually trigger a backup
+app.post('/api/admin/backup', async (req, res) => {
+  // Add CORS headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  try {
+    logger.info('Manual backup triggered');
+    const backupPath = await createBackup(COOKIES_DIR, BACKUP_DIR);
+
+    if (backupPath) {
+      return res.json({
+        success: true,
+        message: 'Backup created successfully',
+        backupPath: path.basename(backupPath)
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: 'No cookies to backup or backup failed'
+      });
+    }
+  } catch (error) {
+    logger.error('Error creating backup:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An unexpected error occurred while creating backup'
     });
   }
 });
@@ -615,10 +676,13 @@ app.get('*', (req, res) => {
 
 // Start the server
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Unified server running on port ${PORT}`);
-  console.log(`Access the application at http://localhost:${PORT}`);
-  console.log(`Access the application at http://192.168.109.171:${PORT}`);
-  console.log(`Access the API at http://localhost:${PORT}/api`);
-  console.log(`Access the admin panel at http://localhost:${PORT}/admin`);
-  console.log(`Cookie directory: ${COOKIES_DIR}`);
+  logger.info(`Unified server running on port ${PORT}`);
+  logger.info(`Access the application at http://localhost:${PORT}`);
+  logger.info(`Access the application at http://192.168.109.171:${PORT}`);
+  logger.info(`Access the API at http://localhost:${PORT}/api`);
+  logger.info(`Access the admin panel at http://localhost:${PORT}/admin`);
+  logger.info(`Cookie directory: ${COOKIES_DIR}`);
+
+  // Schedule automatic backups every 24 hours
+  scheduleBackups(COOKIES_DIR, BACKUP_DIR, 24);
 });
