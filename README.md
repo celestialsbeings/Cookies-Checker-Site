@@ -21,6 +21,24 @@
 
 ---
 
+## 🚀 Deployment Options
+
+<div align="center">
+  <img src="https://img.shields.io/badge/🌐-Apache%20+%20Cloudflare-F38020?style=flat-square" alt="Apache + Cloudflare">
+  <img src="https://img.shields.io/badge/🚇-Cloudflare%20Tunnel-F38020?style=flat-square" alt="Cloudflare Tunnel">
+  <img src="https://img.shields.io/badge/🔄-Port%208080-00FFFF?style=flat-square" alt="Port 8080">
+</div>
+
+Cookie Catcher supports multiple deployment options:
+
+- 🌐 **Apache with Cloudflare** - Traditional setup with Apache proxying to Node.js
+- 🚇 **Cloudflare Tunnel** - Secure connection without exposing ports to the internet
+- 🔒 **Port 8080 Forwarding** - Configured to work with Cloudflare's port 8080 forwarding
+
+Detailed setup instructions for each method are provided in the deployment section.
+
+---
+
 ## ✨ Features
 
 - 🎮 **Interactive Cookie Catcher Game** - Fun way for users to earn and claim cookies
@@ -486,6 +504,41 @@ If there are errors, fix them and restart Apache:
 ```bash
 sudo systemctl restart apache2
 ```
+</details>
+
+<details>
+<summary>🌐 Cloudflare Tunnel Issues</summary>
+
+If you're having issues with Cloudflare Tunnel:
+
+1. **Check tunnel status:**
+   ```bash
+   sudo systemctl status cloudflared
+   ```
+
+2. **View tunnel logs:**
+   ```bash
+   sudo journalctl -u cloudflared
+   ```
+
+3. **Verify tunnel configuration:**
+   ```bash
+   sudo cat /etc/cloudflared/config.yml
+   ```
+
+4. **List active tunnels:**
+   ```bash
+   cloudflared tunnel list
+   ```
+
+5. **Restart the tunnel service:**
+   ```bash
+   sudo systemctl restart cloudflared
+   ```
+
+6. **Check Cloudflare dashboard:**
+   - Ensure the tunnel is active in your Cloudflare dashboard
+   - Verify DNS records are correctly pointing to the tunnel
 </details>
 
 ## 💾 Backup and Restore
