@@ -178,7 +178,7 @@ Since you're using Cloudflare as your proxy with Apache and port 8080 is already
 1. **Ensure Apache is installed and the required modules are enabled:**
    ```bash
    sudo apt install -y apache2
-   sudo a2enmod proxy proxy_http proxy_wstunnel headers
+   sudo a2enmod proxy proxy_http proxy_wstunnel headers rewrite
    ```
 
 2. **Create an Apache configuration file:**
@@ -188,26 +188,24 @@ Since you're using Cloudflare as your proxy with Apache and port 8080 is already
 
 3. **Add the following configuration** (replace yourdomain.com with your actual domain):
    ```apache
-   <VirtualHost *:80>
+   <VirtualHost *:8080>
        ServerName yourdomain.com
        ServerAlias www.yourdomain.com
-
-       # Cloudflare handles SSL, so we don't need to redirect to HTTPS here
 
        # Security headers
        Header always set X-Frame-Options "SAMEORIGIN"
        Header always set X-Content-Type-Options "nosniff"
        Header always set X-XSS-Protection "1; mode=block"
 
-       # Proxy to Node.js application running on port 8080
+       # Proxy to Node.js application running on port 3000
        ProxyPreserveHost On
-       ProxyPass / http://localhost:8080/
-       ProxyPassReverse / http://localhost:8080/
+       ProxyPass / http://localhost:3000/
+       ProxyPassReverse / http://localhost:3000/
 
        # WebSocket support (if needed)
        RewriteEngine On
        RewriteCond %{HTTP:Upgrade} =websocket [NC]
-       RewriteRule /(.*) ws://localhost:8080/$1 [P,L]
+       RewriteRule /(.*) ws://localhost:3000/$1 [P,L]
 
        # Logging
        ErrorLog ${APACHE_LOG_DIR}/cookie-catcher-error.log
@@ -215,18 +213,107 @@ Since you're using Cloudflare as your proxy with Apache and port 8080 is already
    </VirtualHost>
    ```
 
-4. **Enable the site and restart Apache:**
+4. **Configure Apache to listen on port 8080:**
+   ```bash
+   sudo nano /etc/apache2/ports.conf
+   ```
+
+   Add the following line if it doesn't exist:
+   ```apache
+   Listen 8080
+   ```
+
+5. **Enable the site and restart Apache:**
    ```bash
    sudo a2ensite cookie-catcher.conf
    sudo apache2ctl configtest
    sudo systemctl restart apache2
    ```
 
-5. **Cloudflare Configuration:**
+6. **Cloudflare Configuration:**
    - ✅ Ensure your domain is properly set up in Cloudflare
    - ✅ In the DNS settings, make sure you have an A record pointing to your server's IP address
    - ✅ In the SSL/TLS section, set the encryption mode to "Full" or "Full (strict)" if you have SSL on your server
    - ✅ In the Page Rules section, you can create rules for caching if needed
+</details>
+
+### 🚇 Step 3.5: Cloudflare Tunnel Configuration (Alternative to Apache)
+
+<details>
+<summary>📋 Click to expand detailed instructions</summary>
+
+Cloudflare Tunnel provides a secure way to connect your web server to Cloudflare without exposing your public IP or opening ports on your firewall. This is an alternative to the Apache configuration above.
+
+1. **Install Cloudflare Tunnel (cloudflared):**
+   ```bash
+   # Download the latest cloudflared package
+   curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+
+   # Install the package
+   sudo dpkg -i cloudflared.deb
+
+   # Verify installation
+   cloudflared version
+   ```
+
+2. **Authenticate with Cloudflare:**
+   ```bash
+   cloudflared tunnel login
+   ```
+
+   This will open a browser window where you'll need to log in to your Cloudflare account and authorize the tunnel.
+
+3. **Create a new tunnel:**
+   ```bash
+   cloudflared tunnel create cookie-catcher
+   ```
+
+   This will generate a tunnel ID and credentials file.
+
+4. **Configure your tunnel:**
+   ```bash
+   sudo mkdir -p /etc/cloudflared
+   sudo nano /etc/cloudflared/config.yml
+   ```
+
+   Add the following configuration (replace `your-tunnel-id` with your actual tunnel ID):
+   ```yaml
+   tunnel: your-tunnel-id
+   credentials-file: /root/.cloudflared/your-tunnel-id.json
+
+   ingress:
+     - hostname: yourdomain.com
+       service: http://localhost:3000
+     - service: http_status:404
+   ```
+
+5. **Route DNS to your tunnel:**
+   ```bash
+   cloudflared tunnel route dns cookie-catcher yourdomain.com
+   ```
+
+6. **Start the tunnel as a service:**
+   ```bash
+   sudo cloudflared service install
+   sudo systemctl start cloudflared
+   sudo systemctl enable cloudflared
+   ```
+
+7. **Verify the tunnel is running:**
+   ```bash
+   sudo systemctl status cloudflared
+   ```
+
+8. **Configure Cloudflare DNS and SSL:**
+   - ✅ In the Cloudflare dashboard, ensure the DNS record for your domain points to your tunnel
+   - ✅ In the SSL/TLS section, set the encryption mode to "Full" or "Full (strict)"
+   - ✅ In the Rules section, you can create additional security rules if needed
+
+This setup provides several advantages:
+- 🔒 No need to open ports on your firewall
+- 🛡️ Your server's IP address remains hidden
+- 🚀 Automatic SSL/TLS encryption
+- 🌐 DDoS protection through Cloudflare
 </details>
 
 ### 🔒 Step 4: Firewall Configuration
@@ -239,6 +326,21 @@ Since you're using Cloudflare as your proxy with Apache and port 8080 is already
    sudo ufw allow 22/tcp    # SSH
    sudo ufw allow 80/tcp    # HTTP
    sudo ufw allow 443/tcp   # HTTPS
+   sudo ufw allow 8080/tcp  # Apache on port 8080
+   sudo ufw enable
+   ```
+
+2. **Verify firewall status:**
+   ```bash
+   sudo ufw status verbose
+   ```
+
+3. **If using Cloudflare Tunnel instead of direct Apache access:**
+   ```bash
+   # You only need SSH access since Cloudflare Tunnel establishes an outbound connection
+   sudo ufw default deny incoming
+   sudo ufw default allow outgoing
+   sudo ufw allow 22/tcp    # SSH only
    sudo ufw enable
    ```
 </details>
