@@ -683,17 +683,13 @@ app.post('/api/admin/backup', async (req, res) => {
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// Block any direct access to the old admin endpoint
-app.all('/admin', (req, res, next) => {
-  // If it's a GET request, redirect to the new admin panel
-  if (req.method === 'GET') {
-    return res.redirect('/admin/');
-  }
-  // For other methods (POST, etc.), return 404
-  return res.status(404).json({
-    error: 'Not found',
-    message: 'The requested endpoint does not exist.'
-  });
+// Handle admin routes for the SPA
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.get('/admin/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // Serve index.html for all routes (SPA support)

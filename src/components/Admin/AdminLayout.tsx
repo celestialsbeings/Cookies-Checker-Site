@@ -48,17 +48,20 @@ const AdminLayout: React.FC = () => {
   }, []);
 
   const navItems = [
-    { path: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { path: '/admin/cookies', label: 'Cookie Manager', icon: <Cookie size={20} /> },
-    { path: '/admin/status', label: 'System Status', icon: <Activity size={20} /> },
-    { path: '/admin/settings', label: 'Settings', icon: <SettingsIcon size={20} /> },
+    { path: '.', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: 'cookies', label: 'Cookie Manager', icon: <Cookie size={20} /> },
+    { path: 'status', label: 'System Status', icon: <Activity size={20} /> },
+    { path: 'settings', label: 'Settings', icon: <SettingsIcon size={20} /> },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin';
+    const currentPath = location.pathname;
+    if (path === '.') {
+      // Dashboard is active when we're at /admin/ or /admin
+      return currentPath === '/admin/' || currentPath === '/admin';
     }
-    return location.pathname.startsWith(path);
+    // For other paths, check if the current path ends with the path segment
+    return currentPath.endsWith(`/${path}`);
   };
 
   return (
@@ -72,7 +75,7 @@ const AdminLayout: React.FC = () => {
           >
             {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-          <Link to="/admin" className="text-xl font-bold text-purple-400">
+          <Link to="." className="text-xl font-bold text-purple-400">
             Cookie Catcher Admin
           </Link>
         </div>

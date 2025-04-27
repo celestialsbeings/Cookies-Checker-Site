@@ -15,7 +15,7 @@ const AdminRoutes: React.FC = () => {
       <Route path="login" element={<Login />} />
 
       {/* Redirect empty path to dashboard */}
-      <Route path="" element={<Navigate to="/admin/" replace />} />
+      {/* Empty path is handled by the index route */}
 
       {/* Protected admin routes */}
       <Route path="/" element={
