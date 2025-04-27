@@ -50,8 +50,21 @@ class SecurityTokenManager {
       return false;
     }
 
-    // Check if token belongs to this client
-    if (tokenData.clientIp !== clientIp) {
+    // For security, we still check the client IP, but we're more lenient
+    // We consider the token valid if the first part of the IP matches
+    // This helps with Cloudflare and other proxies that might change the exact IP
+    const storedIpParts = tokenData.clientIp.split('.');
+    const currentIpParts = clientIp.split('.');
+
+    // Check if at least the first two parts of the IP match (network identifier)
+    // This is a more lenient check that allows for some IP variation
+    const ipMatches = storedIpParts.length >= 2 &&
+                      currentIpParts.length >= 2 &&
+                      storedIpParts[0] === currentIpParts[0] &&
+                      storedIpParts[1] === currentIpParts[1];
+
+    if (!ipMatches) {
+      console.log(`IP mismatch: Token was created with ${tokenData.clientIp} but claimed with ${clientIp}`);
       return false;
     }
 
@@ -136,6 +149,20 @@ class RateLimiter {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Helper function to get the real client IP from Cloudflare headers
+const getClientIp = (req) => {
+  // If coming through Cloudflare, the client IP is the last one in the X-Forwarded-For header
+  if (req.headers['x-forwarded-for']) {
+    // Get the first IP address (original client) from the X-Forwarded-For header
+    // Cloudflare adds IPs in the format: "client, proxy1, proxy2"
+    const forwardedIps = req.headers['x-forwarded-for'].split(',').map(ip => ip.trim());
+    return forwardedIps[0]; // Return the original client IP
+  }
+
+  // Fallback to remote address if no X-Forwarded-For header
+  return req.socket.remoteAddress;
+};
+
 // Create Express app
 const app = express();
 
@@ -213,8 +240,8 @@ if (!fs.existsSync(BACKUP_DIR)) {
 
 // API endpoint to generate a token when the game is won
 app.post('/api/game-win', (req, res) => {
-  // Get client IP
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Get client IP using our helper function
+  const clientIp = getClientIp(req);
   console.log('Game win from client IP:', clientIp);
 
   // Check if the request includes game score or other verification
@@ -244,8 +271,8 @@ app.post('/api/game-win', (req, res) => {
 app.get('/api/claim-cookie', (req, res) => {
   console.log('Claim cookie request received');
 
-  // Get client IP for rate limiting
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Get client IP for rate limiting using our helper function
+  const clientIp = getClientIp(req);
   console.log('Client IP:', clientIp);
 
   // Get token from query parameter
