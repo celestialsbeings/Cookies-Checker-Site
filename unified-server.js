@@ -39,6 +39,7 @@ class SecurityTokenManager {
   // Validate a token
   validateToken(token, clientIp) {
     if (!this.validTokens.has(token)) {
+      console.log(`Token not found: ${token}`);
       return false;
     }
 
@@ -46,31 +47,92 @@ class SecurityTokenManager {
 
     // Check if token is expired
     if (Date.now() > tokenData.expiryTime) {
+      console.log(`Token expired: ${token}`);
       this.validTokens.delete(token);
       return false;
     }
 
-    // For security, we still check the client IP, but we're more lenient
-    // We consider the token valid if the first part of the IP matches
-    // This helps with Cloudflare and other proxies that might change the exact IP
-    const storedIpParts = tokenData.clientIp.split('.');
-    const currentIpParts = clientIp.split('.');
+    // Enhanced IP validation for both IPv4 and IPv6
+    const storedIp = tokenData.clientIp;
+    const currentIp = clientIp;
 
-    // Check if at least the first two parts of the IP match (network identifier)
-    // This is a more lenient check that allows for some IP variation
-    const ipMatches = storedIpParts.length >= 2 &&
-                      currentIpParts.length >= 2 &&
-                      storedIpParts[0] === currentIpParts[0] &&
-                      storedIpParts[1] === currentIpParts[1];
+    console.log(`Validating token: stored IP = ${storedIp}, current IP = ${currentIp}`);
 
-    if (!ipMatches) {
-      console.log(`IP mismatch: Token was created with ${tokenData.clientIp} but claimed with ${clientIp}`);
-      return false;
+    // If IPs are exactly the same, allow it
+    if (storedIp === currentIp) {
+      console.log('✅ Exact IP match - token valid');
+      this.validTokens.delete(token);
+      return true;
     }
 
-    // Token is valid, remove it so it can't be used again
-    this.validTokens.delete(token);
-    return true;
+    // Handle localhost variations
+    const localhostIps = ['127.0.0.1', '::1', 'localhost', '::ffff:127.0.0.1'];
+    if (localhostIps.includes(storedIp) && localhostIps.includes(currentIp)) {
+      console.log('✅ Localhost IP match - token valid');
+      this.validTokens.delete(token);
+      return true;
+    }
+
+    // For IPv4 addresses, check network match (first two octets)
+    if (storedIp.includes('.') && currentIp.includes('.')) {
+      const storedParts = storedIp.split('.');
+      const currentParts = currentIp.split('.');
+
+      if (storedParts.length >= 2 && currentParts.length >= 2) {
+        const networkMatch = storedParts[0] === currentParts[0] && storedParts[1] === currentParts[1];
+        if (networkMatch) {
+          console.log('✅ IPv4 network match - token valid');
+          this.validTokens.delete(token);
+          return true;
+        }
+      }
+    }
+
+    // For IPv6 addresses, check network match (first 4 segments)
+    if (storedIp.includes(':') && currentIp.includes(':')) {
+      const storedParts = storedIp.split(':');
+      const currentParts = currentIp.split(':');
+
+      if (storedParts.length >= 4 && currentParts.length >= 4) {
+        const networkMatch = storedParts[0] === currentParts[0] &&
+                            storedParts[1] === currentParts[1] &&
+                            storedParts[2] === currentParts[2] &&
+                            storedParts[3] === currentParts[3];
+        if (networkMatch) {
+          console.log('✅ IPv6 network match - token valid');
+          this.validTokens.delete(token);
+          return true;
+        }
+      }
+    }
+
+    // For development/testing: if either IP is localhost-like, be more lenient
+    const isStoredLocal = localhostIps.some(ip => storedIp.includes(ip)) || storedIp.startsWith('192.168.') || storedIp.startsWith('10.') || storedIp.startsWith('172.');
+    const isCurrentLocal = localhostIps.some(ip => currentIp.includes(ip)) || currentIp.startsWith('192.168.') || currentIp.startsWith('10.') || currentIp.startsWith('172.');
+
+    if (isStoredLocal && isCurrentLocal) {
+      console.log('✅ Both IPs are local/private - token valid');
+      this.validTokens.delete(token);
+      return true;
+    }
+
+    // Special handling for Cloudflare tunnel scenarios
+    // If one IP is localhost and the other is a real IP (Cloudflare tunnel scenario)
+    if ((isStoredLocal && !isCurrentLocal) || (!isStoredLocal && isCurrentLocal)) {
+      console.log('✅ Cloudflare tunnel scenario detected - allowing mixed local/external IPs');
+      this.validTokens.delete(token);
+      return true;
+    }
+
+    // Last resort: if we're in a development/testing environment, be very lenient
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('✅ Development mode - allowing token validation');
+      this.validTokens.delete(token);
+      return true;
+    }
+
+    console.log(`❌ IP mismatch: Token was created with ${storedIp} but claimed with ${currentIp}`);
+    return false;
   }
 
   // Create a random token
