@@ -18,7 +18,7 @@ const getEnvVar = (key: string, defaultValue: string): string => {
 
 // Get the API URL from the environment or use a default
 export const API_URL = getEnvVar('VITE_API_URL',
-  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:80');
+  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
 
 // Export other browser-friendly configuration
 export const config = {

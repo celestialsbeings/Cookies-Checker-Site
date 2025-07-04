@@ -55,3 +55,4 @@ temp-uploads/*
 .firebase
 .vercel
 .netlify
+.env.production
